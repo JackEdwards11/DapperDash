@@ -2,7 +2,7 @@
 
 int main()
 {
-    // Window dimesnionss
+    // Window dimesnions
     const int windowWidth = 512;
     const int windowHeight = 380;
     // Initialize window
