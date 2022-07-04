@@ -1,36 +1,60 @@
 #include "raylib.h"
 
+struct AnimData
+{
+    Rectangle rec;
+    Vector2 pos;
+    int frame;
+    float updateTime;
+    float runningTime;
+};
+
 int main()
 {
-    // Window dimesnions
-    const int windowWidth = 512;
-    const int windowHeight = 380;
+
+    int windowDimensions[2];
+    windowDimensions[0] = 512;
+    windowDimensions[1] = 380;
     // Initialize window
-    InitWindow(windowWidth, windowHeight, "Dapper Dasher");
+    InitWindow(windowDimensions[0], windowDimensions[1], "Dapper Dasher");
 
     // Acceleration due to gravity picels per second per second
     const int gravity = 1000;
 
     // Scarfy Set up
     Texture2D scarfy = LoadTexture("textures/scarfy.png");
-    Rectangle scarfyRec;
-    scarfyRec.width = scarfy.width/6;
-    scarfyRec.height = scarfy.height;
-    scarfyRec.x = 0;
-    scarfyRec.y = 0;
-    Vector2 scarfyPos;
-    scarfyPos.x = windowWidth/2 - scarfyRec.width/2;
-    scarfyPos.y = windowHeight - scarfyRec.height;
+    AnimData scarfyData;
+    scarfyData.rec.width = scarfy.width/6;
+    scarfyData.rec.height = scarfy.height;
+    scarfyData.rec.x = 0;
+    scarfyData.rec.y = 0;
+    scarfyData.pos.x = windowDimensions[0]/2 - scarfyData.rec.width/2;
+    scarfyData.pos.y = windowDimensions[1] - scarfyData.rec.height;
+    scarfyData.frame = 0;
+    scarfyData.updateTime = 1.0/12.0;
+    scarfyData.runningTime = 0.0;
 
     // Nebula set up
     Texture2D nebula = LoadTexture("textures/12_nebula_spritesheet.png");
-    // Using arguments to declare rectangle rather than changing after creation
-    Rectangle nebulaRec{ 0.0, 0.0, nebula.width/8, nebula.height/8 };
-    // Using arguments to declare rectangle rather than changing after creation
-    Vector2 nebulaPos{ windowWidth, windowHeight - nebulaRec.height };
 
+    // Anim data for nebula
+    AnimData nebData{ 
+        { 0.0, 0.0, nebula.width/8, nebula.height/8 },  // Rectangle
+        { windowDimensions[0], windowDimensions[1] - nebula.height/8 }, // Vector 2
+        0, //  Frame
+        1.0/12.0, // Update time
+        0.0 // running Time
+    };
+
+    AnimData neb2Data{ 
+        { 0.0, 0.0, nebula.width/8, nebula.height/8 },  // Rectangle
+        { windowDimensions[0]*3, windowDimensions[1] - nebula.height/8 }, // Vector 2
+        0, //  Frame
+        1.0/16.0, // Update time
+        0.0 // running Time
+    };
     // nebula x velocity (pixels per second)
-    int nebVelocity = -600;
+    int nebVelocity = -400;
 
     int velocity = 0;
 
@@ -38,11 +62,6 @@ int main()
     // pixels per second
     const int jumpVelocity = -600;
 
-    const float updateTime = 1.0/12.0;
-    float runningTime = 0;
-
-
-    int frame = 0; // animation frame
     // Set fps
     SetTargetFPS(60);
     while (!WindowShouldClose())
@@ -56,7 +75,7 @@ int main()
         // Delta time (time since last frame)
         float DT = GetFrameTime();
 
-        isInAir = scarfyPos.y < windowHeight - scarfyRec.height;
+        isInAir = scarfyData.pos.y < windowDimensions[1] - scarfyData.rec.height;
 
         // Ground check
         if (!isInAir)
@@ -76,32 +95,61 @@ int main()
         }
 
         // Apply movement
-        scarfyPos.y += velocity * DT;   
-        nebulaPos.x  += nebVelocity * DT;
+        scarfyData.pos.y += velocity * DT;   
+        nebData.pos.x  += nebVelocity * DT;
+        neb2Data.pos.x += nebVelocity * DT;
 
         // draw nebula
-        DrawTextureRec(nebula, nebulaRec, nebulaPos, WHITE);
+        DrawTextureRec(nebula, nebData.rec, nebData.pos, WHITE);
+        // draw nebula 2
+        DrawTextureRec(nebula, neb2Data.rec, neb2Data.pos, RED);
         
 
         // draw scarfy
-        DrawTextureRec(scarfy, scarfyRec, scarfyPos, WHITE);
+        DrawTextureRec(scarfy, scarfyData.rec, scarfyData.pos, WHITE);
         
         // Changing texture after a certain amount of time;
         if (!isInAir)
         {
-            runningTime += DT;
-            if (runningTime >= updateTime)
+            scarfyData.runningTime += DT;
+            if (scarfyData.runningTime >= scarfyData.updateTime)
             {
-                frame++;
-                runningTime = 0.0;
-                if (frame > 5)
+                scarfyData.frame++;
+                scarfyData.runningTime = 0.0;
+                if (scarfyData.frame > 5)
                 {
-                    frame = 0;
+                    scarfyData.frame = 0;
                 }
                 // Update animation frame
-                scarfyRec.x = frame * scarfyRec.width;
+                scarfyData.rec.x = scarfyData.frame * scarfyData.rec.width;
             }
         }
+
+        // Change nebulas texture
+        nebData.runningTime += DT;
+        if (nebData.runningTime >= nebData.updateTime)
+        {
+            nebData.frame;
+            nebData.runningTime = 0;
+            if (nebData.frame > 7)
+            {
+                nebData.frame = 0;
+            }
+            nebData.rec.x = nebData.frame * nebData.rec.width;
+        }
+
+        neb2Data.runningTime += DT;
+        if (neb2Data.runningTime >= neb2Data.updateTime)
+        {
+            neb2Data.frame;
+            neb2Data.runningTime = 0;
+            if (neb2Data.frame > 7)
+            {
+                neb2Data.frame = 0;
+            }
+            neb2Data.rec.x = neb2Data.frame * neb2Data.rec.width;
+        }
+
         
 
         // End Logic
