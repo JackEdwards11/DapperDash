@@ -129,7 +129,7 @@ int main()
         nebData.runningTime += DT;
         if (nebData.runningTime >= nebData.updateTime)
         {
-            nebData.frame;
+            nebData.frame++;
             nebData.runningTime = 0;
             if (nebData.frame > 7)
             {
@@ -141,7 +141,7 @@ int main()
         neb2Data.runningTime += DT;
         if (neb2Data.runningTime >= neb2Data.updateTime)
         {
-            neb2Data.frame;
+            neb2Data.frame++;
             neb2Data.runningTime = 0;
             if (neb2Data.frame > 7)
             {
